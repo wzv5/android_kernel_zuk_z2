@@ -77,6 +77,7 @@
 #define QPNP_HAP_VMAX_SHIFT		1
 #define QPNP_HAP_VMAX_MIN_MV		116
 #define QPNP_HAP_VMAX_MAX_MV		3596
+#define QPNP_HAP_VMAX_DEFAULT_MV	3200
 #define QPNP_HAP_ILIM_MASK		0xFE
 #define QPNP_HAP_ILIM_MIN_MV		400
 #define QPNP_HAP_ILIM_MAX_MV		800
@@ -1338,6 +1339,27 @@ static ssize_t qpnp_hap_vmax_mv_strong_store(struct device *dev,
 	return count;
 }
 
+static ssize_t qpnp_hap_min_show(struct device *dev,
+					struct device_attribute *attr,
+					char *buf)
+{
+	return scnprintf(buf, PAGE_SIZE, "%d\n", QPNP_HAP_VMAX_MIN_MV);
+}
+
+static ssize_t qpnp_hap_max_show(struct device *dev,
+					struct device_attribute *attr,
+					char *buf)
+{
+	return scnprintf(buf, PAGE_SIZE, "%d\n", QPNP_HAP_VMAX_MAX_MV);
+}
+
+static ssize_t qpnp_hap_default_show(struct device *dev,
+					struct device_attribute *attr,
+					char *buf)
+{
+	return scnprintf(buf, PAGE_SIZE, "%d\n", QPNP_HAP_VMAX_DEFAULT_MV);
+}
+
 /* sysfs attributes */
 static struct device_attribute qpnp_hap_attrs[] = {
 	__ATTR(wf_s0, (S_IRUGO | S_IWUSR | S_IWGRP),
@@ -1385,9 +1407,18 @@ static struct device_attribute qpnp_hap_attrs[] = {
 	__ATTR(min_max_test, (S_IRUGO | S_IWUSR | S_IWGRP),
 			qpnp_hap_min_max_test_data_show,
 			qpnp_hap_min_max_test_data_store),
-	__ATTR(vmax_mv_strong, (S_IRUGO | S_IWUSR | S_IWGRP),
+	__ATTR(vtg_level, (S_IRUGO | S_IWUSR | S_IWGRP),
 			qpnp_hap_vmax_mv_strong_show,
 			qpnp_hap_vmax_mv_strong_store),
+	__ATTR(vtg_min, S_IRUGO,
+			qpnp_hap_min_show,
+			NULL),
+	__ATTR(vtg_max, S_IRUGO,
+			qpnp_hap_max_show,
+			NULL),
+	__ATTR(vtg_default, S_IRUGO,
+			qpnp_hap_default_show,
+			NULL),
 };
 #endif
 
