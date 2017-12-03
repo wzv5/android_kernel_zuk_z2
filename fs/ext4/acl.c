@@ -200,6 +200,7 @@ __ext4_set_acl(handle_t *handle, struct inode *inode, int type,
 	switch (type) {
 	case ACL_TYPE_ACCESS:
 		name_index = EXT4_XATTR_INDEX_POSIX_ACL_ACCESS;
+
 		break;
 
 	case ACL_TYPE_DEFAULT:

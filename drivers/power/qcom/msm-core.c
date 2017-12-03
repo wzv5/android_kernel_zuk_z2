@@ -1,4 +1,4 @@
-/* Copyright (c) 2014-2016, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2014-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -249,10 +249,10 @@ void trigger_cpu_pwr_stats_calc(void)
 		if (cpu_node->sensor_id < 0)
 			continue;
 
-		if (cpu_node->temp == prev_temp[cpu])
+		if (cpu_node->temp == prev_temp[cpu]) {
 			sensor_get_temp(cpu_node->sensor_id, &temp);
-
-		cpu_node->temp = temp / scaling_factor;
+			cpu_node->temp = temp / scaling_factor;
+		}
 
 		prev_temp[cpu] = cpu_node->temp;
 
@@ -386,7 +386,7 @@ static int update_userspace_power(struct sched_params __user *argp)
 {
 	int i;
 	int ret;
-	int cpu;
+	int cpu = -1;
 	struct cpu_activity_info *node;
 	struct cpu_static_info *sp, *clear_sp;
 	int cpumask, cluster, mpidr;
@@ -409,7 +409,7 @@ static int update_userspace_power(struct sched_params __user *argp)
 		}
 	}
 
-	if (cpu >= num_possible_cpus())
+	if ((cpu < 0) || (cpu >= num_possible_cpus()))
 		return -EINVAL;
 
 	node = &activity[cpu];
@@ -468,7 +468,7 @@ static int update_userspace_power(struct sched_params __user *argp)
 	spin_unlock(&update_lock);
 
 	for_each_possible_cpu(cpu) {
-		if (pdata_valid[cpu])
+		if (!pdata_valid[cpu])
 			continue;
 
 		blocking_notifier_call_chain(
@@ -1103,6 +1103,7 @@ static int msm_core_dev_probe(struct platform_device *pdev)
 		goto failed;
 
 #ifdef ENABLE_TSENS_SAMPLING
+	INIT_DEFERRABLE_WORK(&sampling_work, samplequeue_handle);
 	ret = msm_core_task_init(&pdev->dev);
 	if (ret)
 		goto failed;
@@ -1110,7 +1111,6 @@ static int msm_core_dev_probe(struct platform_device *pdev)
 	for_each_possible_cpu(cpu)
 		set_threshold(&activity[cpu]);
 
-	INIT_DEFERRABLE_WORK(&sampling_work, samplequeue_handle);
 	schedule_delayed_work(&sampling_work, msecs_to_jiffies(0));
 	pm_notifier(system_suspend_handler, 0);
 #endif
